@@ -1,5 +1,6 @@
-from fastapi.testclient import TestClient
-
+from fastapi.testclient import (
+    TestClient,
+)
 from tg_router import app
 
 client = TestClient(app)
@@ -13,7 +14,11 @@ def test_teams():
 def test_team_funcs():
     initial_teams = client.get("/teams")
 
-    team = {"team_name": "sustem inc", "members": ['Boris', 'Timofei', 'Stepan', 'Nikita'], "tg_group_id": 123}
+    team = {
+        "team_name": "sustem inc",
+        "members": ["Boris", "Timofei", "Stepan", "Nikita"],
+        "tg_group_id": 123,
+    }
 
     # Add new team to firestore
     response = client.post("/new-team", json=team)
@@ -48,31 +53,23 @@ def test_chats():
 def test_chat_funcs():
     initial_chats = client.get("/chats")
 
-    chat_1 = \
-        {
-            "chat_id": "test_chat_id_1_aaoiJWDooi325uoFJ",
-            "is_open": True,
-            "messages":
-                [{
-                    "message": "What does the fox say?",
-                    "user_sent": True,
-                    "time": "2022-06-27T15:44:54.694000+00:00"
-                }]
-        }
-    chat_2 = \
-        {
-            "chat_id": "test_chat_id_2_aaoiJWDooi325uoFJ",
-            "is_open": True
-        }
-    chat_3 = \
-        {
-            "chat_id": "test_chat_id_3_aaoiJWDooi325uoFJ",
-            "is_open": True,
-            "messages":
-                [{
-                    "message": "What does the fox say?"
-                }]
-        }
+    chat_1 = {
+        "chat_id": "test_chat_id_1_aaoiJWDooi325uoFJ",
+        "is_open": True,
+        "messages": [
+            {
+                "message": "What does the fox say?",
+                "user_sent": True,
+                "time": "2022-06-27T15:44:54.694000+00:00",
+            }
+        ],
+    }
+    chat_2 = {"chat_id": "test_chat_id_2_aaoiJWDooi325uoFJ", "is_open": True}
+    chat_3 = {
+        "chat_id": "test_chat_id_3_aaoiJWDooi325uoFJ",
+        "is_open": True,
+        "messages": [{"message": "What does the fox say?"}],
+    }
 
     # Add chats to firestore
     response = client.post("/new-chat", json=chat_1)
@@ -115,7 +112,9 @@ def test_chat_funcs():
     response = client.delete("/delete-chat", params={"chat_id": chat_3["chat_id"]})
     assert response.status_code == 200
     # Try non-existing chat
-    response = client.delete("/delete-chat", params={"chat_id": "non_existing_chat_id_aaoiJWDooi325uoFJ"})
+    response = client.delete(
+        "/delete-chat", params={"chat_id": "non_existing_chat_id_aaoiJWDooi325uoFJ"}
+    )
     assert response.status_code == 404
 
     # Check if you leave the things as they were initially

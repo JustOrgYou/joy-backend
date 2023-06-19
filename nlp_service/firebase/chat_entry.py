@@ -21,14 +21,14 @@ class ChatEntry:
     _chat_id: str
     is_open: bool
     messages: list[ChatMessage]
-    '''
+    """
     Message format:
     {
         "message": [str],
         "is_open": [bool],
         "time": [datetime]
     }
-    '''
+    """
 
     def __init__(self, chat_id, messages=None, is_open=True):
         if messages is None:
@@ -45,7 +45,11 @@ class ChatEntry:
         return self.chat_id == other.chat_id
 
     def to_dict(self):
-        return {"chat_id": self._chat_id, "is_open": self.is_open, "messages": [m.to_dict() for m in self.messages]}
+        return {
+            "chat_id": self._chat_id,
+            "is_open": self.is_open,
+            "messages": [m.to_dict() for m in self.messages],
+        }
 
     @property
     def chat_id(self):

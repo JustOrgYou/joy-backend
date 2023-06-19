@@ -1,19 +1,30 @@
 import logging
 import os
-import uvicorn
-from fastapi import FastAPI, Response
-from fastapi.responses import JSONResponse
-from pydantic import BaseModel
 
-from firebase.firestore_database import FirestoreDatabase
-from firebase.question_entry import QuestionEntry
-from nlp.similarity_providers import sus_sim_provider
+import uvicorn
+from fastapi import (
+    FastAPI,
+    Response,
+)
+from fastapi.responses import (
+    JSONResponse,
+)
+from firebase.firestore_database import (
+    FirestoreDatabase,
+)
+from firebase.question_entry import (
+    QuestionEntry,
+)
+from nlp.similarity_providers import (
+    sus_sim_provider,
+)
+from pydantic import BaseModel
 
 SIMILARITY_CONST = 0.7
 app = FastAPI()
 fd = FirestoreDatabase(app_name="nlp_router")
 
-USE_NLP_ROUTER = os.getenv('USE_NLP_ROUTER', 'True').lower() == 'true'
+USE_NLP_ROUTER = os.getenv("USE_NLP_ROUTER", "True").lower() == "true"
 
 
 class QuestionItem(BaseModel):
@@ -78,6 +89,7 @@ def similar_questions(question: str, index: float = SIMILARITY_CONST):
     """
 
     import time
+
     cur = time.time()
     cur_questions = fd.questions()
 
@@ -93,7 +105,7 @@ def similar_questions(question: str, index: float = SIMILARITY_CONST):
 
     cur2 = time.time()
 
-    logging.warning(f'Similarity run time: {cur2 - cur}')
+    logging.warning(f"Similarity run time: {cur2 - cur}")
 
     return top_similar
 
@@ -106,4 +118,4 @@ if __name__ == "__main__":
     if USE_NLP_ROUTER:
         run_router()
     else:
-        print('USE_NLP_ROUTER = False')
+        print("USE_NLP_ROUTER = False")

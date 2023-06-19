@@ -1,5 +1,6 @@
-from fastapi.testclient import TestClient
-
+from fastapi.testclient import (
+    TestClient,
+)
 from nlp_router import app
 
 client = TestClient(app)
@@ -26,7 +27,9 @@ def test_question_funcs():
     assert client.get("/questions").json() != initial_questions.json()
 
     # Get that question
-    response = client.get("/question", params={"question": "What is the hottest planet in our system?"})
+    response = client.get(
+        "/question", params={"question": "What is the hottest planet in our system?"}
+    )
     assert response.status_code == 200
 
     # Non-existing question
@@ -34,26 +37,36 @@ def test_question_funcs():
     assert response.status_code == 404
 
     # Delete that question
-    response = client.delete("/delete-question", params={"question": "What is the hottest planet in our system?"})
+    response = client.delete(
+        "/delete-question", params={"question": "What is the hottest planet in our system?"}
+    )
     assert response.status_code == 200
 
     # Non-existing question
-    response = client.delete("/delete-question", params={"question": "Non-existing question_WRWQFduhuw&333"})
+    response = client.delete(
+        "/delete-question", params={"question": "Non-existing question_WRWQFduhuw&333"}
+    )
     assert response.status_code == 404
 
     assert client.get("/questions").json() == initial_questions.json()
 
 
 def test_similar():
-
-    question = {"question": "What is the strongest muscle in the human's bod?", "answer": "The teeth"}
+    question = {
+        "question": "What is the strongest muscle in the human's bod?",
+        "answer": "The teeth",
+    }
     client.post("/new-question", json=question)
 
     response = client.get("/similar", params={"question": "Best people muscle which one?"})
     assert response.status_code == 200
 
-    response = client.get("/similar", params={"question": "What is the best muscle in the people?", "index": "0.8"})
+    response = client.get(
+        "/similar", params={"question": "What is the best muscle in the people?", "index": "0.8"}
+    )
     assert response.status_code == 200
 
-    response = client.delete("/delete-question", params={"question": "What is the strongest muscle in the human's bod?"})
+    response = client.delete(
+        "/delete-question", params={"question": "What is the strongest muscle in the human's bod?"}
+    )
     assert response.status_code == 200

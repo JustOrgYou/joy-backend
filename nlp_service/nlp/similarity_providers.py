@@ -1,11 +1,15 @@
-from sentence_transformers import SentenceTransformer
-from sklearn.metrics.pairwise import cosine_similarity
+from sentence_transformers import (
+    SentenceTransformer,
+)
+from sklearn.metrics.pairwise import (
+    cosine_similarity,
+)
 
 
 class abs_sim_provider:
     @classmethod
     def encode_question(cls, question: str) -> str:
-        return ''
+        return ""
 
     @staticmethod
     def similarity(q1_key: str, q2_key: str) -> float:
@@ -13,7 +17,7 @@ class abs_sim_provider:
 
 
 class sus_sim_provider(abs_sim_provider):
-    model = SentenceTransformer('bert-base-nli-mean-tokens')
+    model = SentenceTransformer("bert-base-nli-mean-tokens")
 
     @classmethod
     def encode_question(cls, question: str) -> str:

@@ -1,6 +1,14 @@
-from chat_entry import ChatEntry, ChatMessage
-from firestore_database import FirestoreDatabase
-from question_entry import QuestionEntry
+from chat_entry import (
+    ChatEntry,
+    ChatMessage,
+)
+
+from firestore_database import (
+    FirestoreDatabase,
+)
+from question_entry import (
+    QuestionEntry,
+)
 from team_entry import TeamEntry
 
 
@@ -9,7 +17,7 @@ class TestFirestoreDatabase:
 
     def test_teams(self):
         for t in self.fd.teams():
-            print(f'{t.team_name}: {t.members}')
+            print(f"{t.team_name}: {t.members}")
 
     def test_team_funcs(self):
         initial_teams = self.fd.teams()
@@ -44,7 +52,9 @@ class TestFirestoreDatabase:
 
         question_1 = QuestionEntry("key_1", "What is the hottest planet in our system?", "Venus")
         question_2 = QuestionEntry("key_2", "What does the fox say?", "Mimmimimimmimii")
-        question_3 = QuestionEntry("key_3", "Why were you running away?", "Why were you pursuing me?")
+        question_3 = QuestionEntry(
+            "key_3", "Why were you running away?", "Why were you pursuing me?"
+        )
 
         self.fd.set_question(question_1)
         self.fd.set_question(question_2)
@@ -70,13 +80,19 @@ class TestFirestoreDatabase:
     def test_chats_funcs(self):
         initial_chats = self.fd.chats()
 
-        chat_1 = ChatEntry("chat_test_1_OIERUcmio213JDd",
-                           messages=[ChatMessage("Who let the dogs out?", user_sent=True),
-                                     ChatMessage("Stop spamming, or you'll be banned", user_sent=False)],
-                           is_open=False)
-        chat_2 = ChatEntry("chat_test_2_OIERUcmio213JDd",
-                           messages=[ChatMessage("How could i download it?", user_sent=True)],
-                           is_open=True)
+        chat_1 = ChatEntry(
+            "chat_test_1_OIERUcmio213JDd",
+            messages=[
+                ChatMessage("Who let the dogs out?", user_sent=True),
+                ChatMessage("Stop spamming, or you'll be banned", user_sent=False),
+            ],
+            is_open=False,
+        )
+        chat_2 = ChatEntry(
+            "chat_test_2_OIERUcmio213JDd",
+            messages=[ChatMessage("How could i download it?", user_sent=True)],
+            is_open=True,
+        )
         chat_3 = ChatEntry("chat_test_3_OIERUcmio213JDd")
 
         self.fd.set_chat(chat_1)
