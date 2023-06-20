@@ -46,7 +46,10 @@ def raise_proper_http(func):
 # pylint: disable=too-many-arguments
 @app.post("/post/task", response_class=PlainTextResponse)
 # @raise_proper_http
-async def post_task(tasks: list[Task], threshold: int):
+async def post_task(
+        tasks: list[Task],
+        threshold: int
+):
     if len(tasks) > 0:
         return tasks[0]
 
