@@ -2,7 +2,6 @@ from chat_entry import (
     ChatEntry,
     ChatMessage,
 )
-
 from firestore_database import (
     FirestoreDatabase,
 )

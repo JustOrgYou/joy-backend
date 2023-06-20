@@ -1,4 +1,6 @@
+import dataclasses
 import functools
+import json
 import logging
 import os
 
@@ -9,9 +11,14 @@ from fastapi import (
     HTTPException,
 )
 from fastapi.responses import (
-    FileResponse,
     JSONResponse,
+    PlainTextResponse,
 )
+
+from src.classes import (
+    Task,
+)
+
 
 app = FastAPI()
 
@@ -37,17 +44,13 @@ def raise_proper_http(func):
 
 
 # pylint: disable=too-many-arguments
-@app.get("/json/{username}", response_class=JSONResponse)
-@raise_proper_http
-async def get_json(
-    username: str,
-):
-    json_answer: dict = {
-        "ans": f"OK (username: {username})",
-    }
+@app.post("/post/task", response_class=PlainTextResponse)
+# @raise_proper_http
+async def post_task(tasks: list[Task], threshold: int):
+    if len(tasks) > 0:
+        return tasks[0]
 
-    return JSONResponse(json_answer)
-    # return FileResponse(path=path, media_type="text/calendar")
+    return Task.schema_json()
 
 
 if __name__ == "__main__":
