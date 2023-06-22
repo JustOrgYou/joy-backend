@@ -1,6 +1,4 @@
-import dataclasses
 import functools
-import json
 import logging
 import os
 
@@ -11,13 +9,18 @@ from fastapi import (
     HTTPException,
 )
 from fastapi.responses import (
-    JSONResponse,
-    PlainTextResponse,
+    PlainTextResponse, JSONResponse
 )
 
-from src.classes import (
+from src.master.classes import (
     Task,
 )
+import httpx
+from src.ml.classes import Entry
+
+ML_HOST = "http://localhost:8082"
+URL_CREATE = f"{ML_HOST}/entries"
+URL_SIMILARITY = f"{ML_HOST}/similarity"
 
 
 app = FastAPI()
@@ -44,16 +47,30 @@ def raise_proper_http(func):
 
 
 # pylint: disable=too-many-arguments
-@app.post("/post/task", response_class=PlainTextResponse)
+@app.post("/tasks", response_class=JSONResponse)
 # @raise_proper_http
 async def post_task(
         tasks: list[Task],
-        threshold: int
+        # threshold: int
 ):
-    if len(tasks) > 0:
-        return tasks[0]
 
-    return Task.schema_json()
+    serialized_tasks: list[dict] = list()
+
+    for t in tasks:
+        e = Entry(
+            pk=t.pk, text=t.form_representation_string()
+        )
+        serialized_tasks.append(e.dict())
+
+    create_body = {
+        "entries": serialized_tasks
+    }
+
+    client = httpx.AsyncClient()
+    r = await client.post(URL_CREATE, json=create_body)
+
+    print(r)
+    return {"detail": "OK"}
 
 
 if __name__ == "__main__":

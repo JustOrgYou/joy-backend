@@ -1,4 +1,4 @@
-from src.nlp.similarity_providers import (
+from src.ml.similarity_providers import (
     SimilarityProvider
 )
 

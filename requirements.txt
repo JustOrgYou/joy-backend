@@ -1,7 +1,8 @@
-fastapi
-uvicorn
+pydantic~=1.10.9
+fastapi~=0.97.0
+uvicorn~=0.22.0
 
-scikit-learn
+scikit-learn~=1.2.2
 sentence-transformers
 
 isort~=5.12.0
@@ -9,3 +10,4 @@ black~=23.1.0
 flake8
 pylint
 mypy
+
