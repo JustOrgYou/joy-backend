@@ -1,29 +1,32 @@
-import dataclasses
-
 from pydantic import BaseModel
 
-from src.ml.similarity_providers import SimilarityProvider
+from src.ml.similarity_providers import (
+    SimilarityProvider,
+)
 
 
-# Used for API Validation & Serialization
+def process_entry(entry: "Entry") -> list[float]:
+    return SimilarityProvider.encode_question(entry.text)
+
+
 class Entry(BaseModel):
     pk: int
     text: str
 
 
-@dataclasses.dataclass
-class ProcessedEntry:
-    pk: int
-    vector: list[float]
+class PostEntriesBody(BaseModel):
+    entries: list[Entry]
+    force_update: bool | None
 
 
-def compare(vec1: list[float], vec2: list[float]):
-    return SimilarityProvider.get_similarity(vec1, vec2)
+class DeleteEntriesBody(BaseModel):
+    ids: list[int]
+
+
+class PostSimilarityBody(BaseModel):
+    pk_list: list[int] | None
+    threshold: float
 
 
 class SimilarityAnswer(BaseModel):
-    similarity: float
-
-
-def process_entry(entry: Entry) -> list[float]:
-    return SimilarityProvider.encode_question(entry.text)
+    similarity_list: list[list[int]]

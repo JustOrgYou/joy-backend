@@ -2,6 +2,10 @@ import datetime
 
 from pydantic import BaseModel
 
+from src.ml.classes import (
+    SimilarityAnswer,
+)
+
 
 # @pydantic.dataclasses.dataclass
 class Task(BaseModel):
@@ -26,3 +30,13 @@ class Task(BaseModel):
 class Notebook(BaseModel):
     tasks: list[Task]
     keywords: list[str]
+
+
+class PostTasksBody(BaseModel):
+    tasks: list[Task]
+    threshold: float
+    # force_update: bool
+
+
+class PostTasksResponse(SimilarityAnswer):
+    pass

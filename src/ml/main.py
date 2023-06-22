@@ -1,7 +1,6 @@
-import functools
+import itertools
 import logging
 import os
-import pprint
 
 import fastapi
 import uvicorn
@@ -9,10 +8,20 @@ from fastapi import (
     FastAPI,
     HTTPException,
 )
-from fastapi.responses import JSONResponse
-from pydantic import BaseModel
+from fastapi.responses import (
+    JSONResponse,
+)
 
-from src.ml.classes import Entry, process_entry, SimilarityAnswer, compare
+from src.ml.classes import (
+    DeleteEntriesBody,
+    PostEntriesBody,
+    PostSimilarityBody,
+    SimilarityAnswer,
+    process_entry,
+)
+from src.ml.similarity_providers import (
+    SimilarityProvider,
+)
 
 app = FastAPI()
 
@@ -20,27 +29,24 @@ HTTP_HOST = os.getenv("HTTP_HOST", "0.0.0.0")
 HTTP_PORT = int(os.getenv("HTTP_PORT", "8082"))
 
 
-class PostEntriesBody(BaseModel):
-    entries: list[Entry]
+def compare(vec1: list[float], vec2: list[float]):
+    return SimilarityProvider.get_similarity(vec1, vec2)
 
 
 @app.post("/entries", response_class=JSONResponse)
 async def post_entries(body: PostEntriesBody):
+    if body.force_update is None:
+        body.force_update = False
+
     for e in body.entries:
-        if e.pk not in processed_entries_dict:
+        if e.pk not in processed_entries_dict or body.force_update:
             processed_entries_dict[e.pk] = process_entry(e)
         else:
             logging.warning(f"{e.pk} is already in dict")
 
     # pprint.pprint(processed_entries_dict)
     pk_list = sorted(list(processed_entries_dict.keys()))
-    return {
-        "pk_list": str(pk_list)
-    }
-
-
-class DeleteEntriesBody(BaseModel):
-    ids: list[int]
+    return {"pk_list": str(pk_list)}
 
 
 @app.delete("/entries", response_class=JSONResponse)
@@ -54,23 +60,36 @@ async def delete_entries(body: DeleteEntriesBody):
     return {"detail": "OK"}
 
 
-@app.get("/similarity")
-async def get_similarity(pk1: int, pk2: int):
-    if pk1 not in processed_entries_dict or pk2 not in processed_entries_dict:
-        raise HTTPException(
-            status_code=fastapi.status.HTTP_404_NOT_FOUND,
-            detail=f"Item not found"
-        )
+@app.post("/similarity")
+async def get_similarity(body: PostSimilarityBody):
+    result_list: list[list[int]] = list()
 
-    # pe1 = list(filter(lambda x: x.pk == pk1, processed_entries_dict))[0]
-    # pe2 = list(filter(lambda x: x.pk == pk2, processed_entries_dict))[0]
+    pk_list = body.pk_list
+    if pk_list is None:
+        pk_list = list(processed_entries_dict.keys())
 
-    pe1 = processed_entries_dict[pk1]
-    pe2 = processed_entries_dict[pk2]
+    for pk1 in pk_list:
+        if pk1 not in processed_entries_dict:
+            raise HTTPException(
+                status_code=fastapi.status.HTTP_404_NOT_FOUND,
+                detail=f"Item not found: {pk1}",
+            )
 
-    return SimilarityAnswer(
-        similarity=compare(pe1, pe2)
-    )
+    # Example: [(1, 2), (1, 3), (2, 3)]
+    possible_similar: list[list[int]] = list(itertools.combinations(pk_list, 2))
+
+    for pk1, pk2 in possible_similar:
+        pe1 = processed_entries_dict[pk1]
+        pe2 = processed_entries_dict[pk2]
+
+        similarity: float = compare(pe1, pe2)
+
+        logging.info(f"{pk1, pk2}: {similarity}, {body.threshold}")
+
+        if similarity >= body.threshold:
+            result_list.append([pk1, pk2])
+
+    return SimilarityAnswer(similarity_list=result_list)
 
 
 if __name__ == "__main__":

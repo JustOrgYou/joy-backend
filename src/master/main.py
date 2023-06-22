@@ -1,27 +1,27 @@
-import functools
 import logging
 import os
 
-import fastapi
+import httpx
 import uvicorn
 from fastapi import (
     FastAPI,
-    HTTPException,
 )
 from fastapi.responses import (
-    PlainTextResponse, JSONResponse
+    JSONResponse,
 )
 
 from src.master.classes import (
-    Task,
+    PostTasksBody,
 )
-import httpx
-from src.ml.classes import Entry
+from src.ml.classes import (
+    Entry,
+    PostEntriesBody,
+    PostSimilarityBody,
+)
 
 ML_HOST = "http://localhost:8082"
 URL_CREATE = f"{ML_HOST}/entries"
 URL_SIMILARITY = f"{ML_HOST}/similarity"
-
 
 app = FastAPI()
 
@@ -29,48 +29,32 @@ HTTP_HOST = os.getenv("HTTP_HOST", "0.0.0.0")
 HTTP_PORT = int(os.getenv("HTTP_PORT", "8081"))
 
 
-def raise_proper_http(func):
-    @functools.wraps(func)
-    async def wrapper(*args, **kwargs):
-        try:
-            result = await func(*args, **kwargs)
-        except HTTPException as e:
-            raise e
-        except Exception as e:
-            raise HTTPException(
-                status_code=fastapi.status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"{e}"
-            ) from e
-
-        return result
-
-    return wrapper
-
-
-# pylint: disable=too-many-arguments
 @app.post("/tasks", response_class=JSONResponse)
-# @raise_proper_http
-async def post_task(
-        tasks: list[Task],
-        # threshold: int
-):
-
+async def post_task(body: PostTasksBody):
     serialized_tasks: list[dict] = list()
 
-    for t in tasks:
-        e = Entry(
-            pk=t.pk, text=t.form_representation_string()
-        )
+    for t in body.tasks:
+        e = Entry(pk=t.pk, text=t.form_representation_string())
         serialized_tasks.append(e.dict())
 
-    create_body = {
-        "entries": serialized_tasks
-    }
+    async with httpx.AsyncClient() as client:
+        # fmt: off
+        create_body: dict = PostEntriesBody(
+            entries=serialized_tasks,
+            force_update=True
+        ).dict()
 
-    client = httpx.AsyncClient()
-    r = await client.post(URL_CREATE, json=create_body)
+        await client.post(URL_CREATE, json=create_body)
 
-    print(r)
-    return {"detail": "OK"}
+        similarity_body: dict = PostSimilarityBody(
+            pk_list=[t.pk for t in body.tasks],
+            threshold=body.threshold
+        ).dict()
+        # fmt: on
+
+        r = await client.post(URL_SIMILARITY, json=similarity_body)
+
+    return r.json()
 
 
 if __name__ == "__main__":

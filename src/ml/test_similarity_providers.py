@@ -1,5 +1,5 @@
 from src.ml.similarity_providers import (
-    SimilarityProvider
+    SimilarityProvider,
 )
 
 QUESTION: str = "What is the strongest muscle in the humans body?"
