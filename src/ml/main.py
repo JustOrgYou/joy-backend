@@ -16,8 +16,7 @@ from src.ml.classes import (
     DeleteEntriesBody,
     PostEntriesBody,
     PostSimilarityBody,
-    SimilarityAnswer,
-    process_entry,
+    SimilarityAnswer, Entry,
 )
 from src.ml.similarity_providers import (
     SimilarityProvider,
@@ -100,3 +99,7 @@ if __name__ == "__main__":
     processed_entries_dict: dict[int, list[float]] = dict()
 
     uvicorn.run(app=app, host=HTTP_HOST, port=HTTP_PORT)
+
+
+def process_entry(entry: "Entry") -> list[float]:
+    return SimilarityProvider.encode_question(entry.text)

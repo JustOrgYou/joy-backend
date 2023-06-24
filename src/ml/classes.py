@@ -1,13 +1,5 @@
 from pydantic import BaseModel
 
-from src.ml.similarity_providers import (
-    SimilarityProvider,
-)
-
-
-def process_entry(entry: "Entry") -> list[float]:
-    return SimilarityProvider.encode_question(entry.text)
-
 
 class Entry(BaseModel):
     pk: int

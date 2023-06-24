@@ -1,6 +1,4 @@
 import logging
-import os
-
 import httpx
 import uvicorn
 from fastapi import (
@@ -18,15 +16,23 @@ from src.ml.classes import (
     PostEntriesBody,
     PostSimilarityBody,
 )
+from pydantic import BaseSettings
 
-ML_HOST = "http://localhost:8082"
-URL_CREATE = f"{ML_HOST}/entries"
-URL_SIMILARITY = f"{ML_HOST}/similarity"
 
-app = FastAPI()
+class MySettings(BaseSettings):
+    ML_HOST: str = "http://localhost:8082"
+    URL_CREATE: str = f"{ML_HOST}/entries"
+    URL_SIMILARITY: str = f"{ML_HOST}/similarity"
 
-HTTP_HOST = os.getenv("HTTP_HOST", "0.0.0.0")
-HTTP_PORT = int(os.getenv("HTTP_PORT", "8081"))
+    HTTP_HOST: str = "0.0.0.0"
+    HTTP_PORT: int = 8081
+
+
+app = FastAPI(
+    title="Master service",
+    version="0.1"
+)
+settings = MySettings()
 
 
 @app.post("/tasks", response_class=JSONResponse)
@@ -44,7 +50,7 @@ async def post_task(body: PostTasksBody):
             force_update=True
         ).dict()
 
-        await client.post(URL_CREATE, json=create_body)
+        await client.post(settings.URL_CREATE, json=create_body)
 
         similarity_body: dict = PostSimilarityBody(
             pk_list=[t.pk for t in body.tasks],
@@ -52,7 +58,7 @@ async def post_task(body: PostTasksBody):
         ).dict()
         # fmt: on
 
-        r = await client.post(URL_SIMILARITY, json=similarity_body)
+        r = await client.post(settings.URL_SIMILARITY, json=similarity_body)
 
     return r.json()
 
@@ -62,4 +68,4 @@ if __name__ == "__main__":
         format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO
     )
 
-    uvicorn.run(app=app, host=HTTP_HOST, port=HTTP_PORT)
+    uvicorn.run(app=app, host=settings.HTTP_HOST, port=settings.HTTP_PORT)
