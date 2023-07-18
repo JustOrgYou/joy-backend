@@ -29,6 +29,10 @@ HTTP_HOST = os.getenv("HTTP_HOST", "0.0.0.0")
 HTTP_PORT = int(os.getenv("HTTP_PORT", "8082"))
 
 
+def process_entry(entry: "Entry") -> list[float]:
+    return SimilarityProvider.encode_question(entry.text)
+
+
 def compare(vec1: list[float], vec2: list[float]):
     return SimilarityProvider.get_similarity(vec1, vec2)
 
@@ -100,7 +104,3 @@ if __name__ == "__main__":
     processed_entries_dict: dict[int, list[float]] = dict()
 
     uvicorn.run(app=app, host=HTTP_HOST, port=HTTP_PORT)
-
-
-def process_entry(entry: "Entry") -> list[float]:
-    return SimilarityProvider.encode_question(entry.text)
