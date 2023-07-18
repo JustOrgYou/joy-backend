@@ -2,7 +2,7 @@ import datetime
 
 from pydantic import BaseModel
 
-from src.ml.classes import (
+from src.domain.similarity.classes import (
     SimilarityAnswer,
 )
 

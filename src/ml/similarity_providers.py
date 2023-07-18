@@ -16,3 +16,8 @@ class SimilarityProvider:
     @staticmethod
     def get_similarity(vec1: list[float], vec2: list[float]) -> float:
         return cosine_similarity([vec1], [vec2])[0][0]
+
+
+if __name__ == "__main__":
+    # cache model
+    SimilarityProvider.encode_question("test")

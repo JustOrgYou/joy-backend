@@ -1,4 +1,5 @@
 import logging
+import os
 import httpx
 import uvicorn
 from fastapi import (
@@ -11,7 +12,7 @@ from fastapi.responses import (
 from src.master.classes import (
     PostTasksBody,
 )
-from src.ml.classes import (
+from src.domain.similarity.classes import (
     Entry,
     PostEntriesBody,
     PostSimilarityBody,
@@ -20,7 +21,7 @@ from pydantic import BaseSettings
 
 
 class MySettings(BaseSettings):
-    ML_HOST: str = "http://localhost:8082"
+    ML_HOST: str = f"http://{os.environ['ML_HOST']}:8082"
     URL_CREATE: str = f"{ML_HOST}/entries"
     URL_SIMILARITY: str = f"{ML_HOST}/similarity"
 
@@ -28,11 +29,9 @@ class MySettings(BaseSettings):
     HTTP_PORT: int = 8081
 
 
-app = FastAPI(
-    title="Master service",
-    version="0.1"
-)
+app = FastAPI(title="Master service", version="0.1")
 settings = MySettings()
+print(f"Connect to ml via: {settings.ML_HOST}")
 
 
 @app.post("/tasks", response_class=JSONResponse)

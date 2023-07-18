@@ -12,11 +12,12 @@ from fastapi.responses import (
     JSONResponse,
 )
 
-from src.ml.classes import (
+from src.domain.similarity.classes import (
     DeleteEntriesBody,
     PostEntriesBody,
     PostSimilarityBody,
-    SimilarityAnswer, Entry,
+    SimilarityAnswer,
+    Entry,
 )
 from src.ml.similarity_providers import (
     SimilarityProvider,
