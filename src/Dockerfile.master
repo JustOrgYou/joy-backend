@@ -3,9 +3,13 @@ FROM python:3.11-slim
 WORKDIR /code
 
 # install requirements
-COPY . /code
+COPY ./master/requirements.txt /code/src/master/requirements.txt
 
 RUN pip install pip --upgrade --no-cache-dir && pip install --no-cache-dir  -r /code/src/master/requirements.txt
+
+COPY ./__init__.py ./src/
+COPY ./master /code/src/master
+COPY ./domain /code/src/domain
 
 EXPOSE 8081/tcp
 EXPOSE 8081/udp

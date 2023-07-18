@@ -3,9 +3,18 @@ FROM python:3.11-slim
 WORKDIR /code
 
 # install requirements
-COPY . /code
+COPY ./ml/requirements.txt /code/src/ml/requirements.txt
 
 RUN pip install pip --upgrade --no-cache-dir && pip install --no-cache-dir  -r /code/src/ml/requirements.txt
+
+# cache model
+COPY ./ml/similarity_providers.py /code/src/ml/similarity_providers.py
+RUN python src/ml/similarity_providers.py
+
+
+COPY ./__init__.py ./src/
+COPY ./ml /code/src/ml
+COPY ./domain /code/src/domain
 
 EXPOSE 8082/tcp
 EXPOSE 8082/udp
