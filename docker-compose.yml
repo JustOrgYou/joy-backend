@@ -5,6 +5,7 @@ services:
     build:
       context: './src/'
       dockerfile: 'Dockerfile.master'
+    image: joy-master:latest
     ports:
       - '8081:8081'
     depends_on:
@@ -16,5 +17,6 @@ services:
     build:
       context: './src/'
       dockerfile: 'Dockerfile.ai'
+    image: joy-ml:latest
     ports:
       - '8082:8082'
