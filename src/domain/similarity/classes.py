@@ -22,3 +22,7 @@ class PostSimilarityBody(BaseModel):
 
 class SimilarityAnswer(BaseModel):
     similarity_list: list[list[int]]
+
+
+class StatusResponse(BaseModel):
+    status: str

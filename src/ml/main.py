@@ -8,9 +8,6 @@ from fastapi import (
     FastAPI,
     HTTPException,
 )
-from fastapi.responses import (
-    JSONResponse,
-)
 
 from src.domain.similarity.classes import (
     DeleteEntriesBody,
@@ -18,6 +15,7 @@ from src.domain.similarity.classes import (
     PostSimilarityBody,
     SimilarityAnswer,
     Entry,
+    StatusResponse,
 )
 from src.ml.similarity_providers import (
     SimilarityProvider,
@@ -37,7 +35,7 @@ def compare(vec1: list[float], vec2: list[float]):
     return SimilarityProvider.get_similarity(vec1, vec2)
 
 
-@app.post("/entries", response_class=JSONResponse)
+@app.post("/entries", response_model=SimilarityAnswer)
 async def post_entries(body: PostEntriesBody):
     if body.force_update is None:
         body.force_update = False
@@ -53,7 +51,7 @@ async def post_entries(body: PostEntriesBody):
     return {"pk_list": str(pk_list)}
 
 
-@app.delete("/entries", response_class=JSONResponse)
+@app.delete("/entries", response_model=StatusResponse)
 async def delete_entries(body: DeleteEntriesBody):
     for i in body.ids:
         if i in processed_entries_dict:
@@ -61,10 +59,10 @@ async def delete_entries(body: DeleteEntriesBody):
         else:
             logging.error(f"PK {i} not in dict")
 
-    return {"detail": "OK"}
+    return StatusResponse(status="OK")
 
 
-@app.post("/similarity")
+@app.post("/similarity", response_model=SimilarityAnswer)
 async def get_similarity(body: PostSimilarityBody):
     result_list: list[list[int]] = list()
 
@@ -96,9 +94,17 @@ async def get_similarity(body: PostSimilarityBody):
     return SimilarityAnswer(similarity_list=result_list)
 
 
+# delete all tasks
+@app.delete("/all_entries", response_model=StatusResponse)
+async def delete_all_tasks():
+    processed_entries_dict.clear()
+    return StatusResponse(status="OK")
+
+
 if __name__ == "__main__":
     logging.basicConfig(
-        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO
+        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+        level=logging.INFO,
     )
 
     processed_entries_dict: dict[int, list[float]] = dict()
